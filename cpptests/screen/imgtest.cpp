@@ -65,7 +65,8 @@ Image_ randomImg(int w, int h) {
     return screen;
 }
 
-void dumpBytes(const char *lbl, const uint8_t *ptr) {
+void dumpBytes(const char *lbl, const void *ptr0) {
+    auto ptr = (const uint8_t*)ptr0;
     printf("%s:", lbl);
     for (int i = 0; i < 16; ++i) {
         printf(" %02x", *ptr++);
@@ -174,11 +175,42 @@ void testBPP() {
 
 }
 
+void testBitExp() {
+    uint32_t tbl[256];
+    for (int i = 0; i < 256; ++i)
+        tbl[i] = 0x1011 * (i & 0xf) | (0x110100 * (i>>4));
+    uint32_t colors[] = { 0x87654321, 0, 0, 0, 0, 0 };
+    uint32_t dst0[10];
+
+    uint32_t numWords = 1;
+    const uint32_t *src = colors;
+    uint32_t *dst = dst0;
+
+    while (numWords--)
+    {
+        uint32_t s = *src++;
+        uint32_t o = tbl[s & 0xff];
+        uint32_t v = tbl[(s >> 8) & 0xff];
+        *dst++ = o | (v << 24);
+        o = tbl[(s >> 16) & 0xff];
+        *dst++ = (v >> 8) | (o << 16);
+        v = tbl[s >> 24];
+        *dst++ = (o >> 16) | (v << 8);
+    }
+
+    dumpBytes("tbl", tbl + 18);
+    dumpBytes("src", colors);
+    dumpBytes("dst", dst0);
+}
+
 extern "C" int main() {
+    #if 1
     bpp = 1;    
     testBPP();
     bpp = 4;    
     testBPP();
+    #endif
+    testBitExp();
     return 0;
 }
 
