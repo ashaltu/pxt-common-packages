@@ -125,8 +125,10 @@ namespace scene {
     //% help=scene/center-camera-at
     export function centerCameraAt(x: number, y: number) {
         const scene = game.currentScene();
+        let cameraSprite
         scene.camera.sprite = undefined;
-        scene.camera.offsetX = x;
-        scene.camera.offsetY = y;
+        
+        scene.camera.offsetX = x - screenWidth() >> 1;
+        scene.camera.offsetY = y - screenHeight() >> 1;
     }
 }
